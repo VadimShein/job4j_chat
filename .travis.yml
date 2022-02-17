@@ -1,0 +1,22 @@
+language: java
+jdk:
+  - openjdk13
+
+sudo: false
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+
+notifications:
+  email:
+    recipients:
+      - shein.v94@mail.ru
+    on_success: never # default: change
+    on_failure: never # default: always
+
+env:
+  global:
+    - CODECOV_TOKEN="876BWxoxHAcFqQHpesny"
+
+
+
