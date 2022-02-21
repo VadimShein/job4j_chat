@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
 import ru.job4j.chat.entity.Message;
 import ru.job4j.chat.entity.Room;
 import ru.job4j.chat.service.RoomService;
@@ -31,7 +32,7 @@ public class RoomController {
 
     @GetMapping("/")
     public Collection<Room> findAll() {
-        HashMap<Integer, Room> rsl = new HashMap();
+        HashMap<Integer, Room> rsl = new HashMap<>();
         List<Message> messages = rest.exchange(
                 API, HttpMethod.GET, null, new ParameterizedTypeReference<List<Message>>() { }
         ).getBody();
@@ -52,6 +53,11 @@ public class RoomController {
     @GetMapping("/{id}")
     public ResponseEntity<Room> findById(@PathVariable int id) {
         var room = this.rooms.findById(id);
+        if (room.isEmpty()) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Account is not found."
+            );
+        }
         List<Message> messages = rest.exchange(
                 API, HttpMethod.GET, null, new ParameterizedTypeReference<List<Message>>() { }
         ).getBody();
@@ -60,10 +66,7 @@ public class RoomController {
                 room.get().addMessage(message);
             }
         }
-        return new ResponseEntity<>(
-                room.orElse(new Room()),
-                room.isPresent() ? HttpStatus.OK : HttpStatus.NOT_FOUND
-        );
+        return new ResponseEntity<>(room.orElse(new Room()), HttpStatus.OK);
     }
 
     @PostMapping("/")
@@ -77,6 +80,9 @@ public class RoomController {
 
     @PutMapping("/")
     public ResponseEntity<Void> update(@RequestBody Message message) {
+        if (message.getText() == null) {
+            throw new NullPointerException("Message text mustn't be empty");
+        }
         rest.put(API, message);
         if (rooms.findById(message.getRoomId()).isPresent()) {
             rooms.findById(message.getRoomId()).get().addMessage(message);

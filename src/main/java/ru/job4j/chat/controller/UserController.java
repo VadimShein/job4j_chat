@@ -20,6 +20,9 @@ public class UserController {
 
     @PostMapping("/sign-up")
     public void signUp(@RequestBody Person person) {
+        if (person.getUsername() == null || person.getPassword() == null || person.getRole() == null) {
+            throw new NullPointerException("Username, password and role mustn't be empty");
+        }
         person.setPassword(encoder.encode(person.getPassword()));
         users.save(person);
     }
