@@ -20,7 +20,7 @@ import java.util.stream.StreamSupport;
 @RestController
 @RequestMapping("/message")
 public class MessageController {
-    private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class.getSimpleName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(MessageController.class.getSimpleName());
     private final MessageService messages;
     private final ObjectMapper objectMapper;
 
