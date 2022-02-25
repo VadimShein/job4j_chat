@@ -1,5 +1,7 @@
 package ru.job4j.chat.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import java.util.Date;
 import java.util.Objects;
@@ -14,6 +16,7 @@ public class Message {
     private Date created = new Date(System.currentTimeMillis());
     @Column(name = "room_id")
     private int roomId;
+    @JsonIgnore
     @ManyToOne
     private Person author;
 
