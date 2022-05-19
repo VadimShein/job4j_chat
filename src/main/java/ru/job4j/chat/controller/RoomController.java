@@ -12,6 +12,7 @@ import ru.job4j.chat.entity.Message;
 import ru.job4j.chat.entity.Room;
 import ru.job4j.chat.service.RoomService;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -41,14 +42,16 @@ public class RoomController {
             List<Message> messages = rest.exchange(
                     API, HttpMethod.GET, entity, new ParameterizedTypeReference<List<Message>>() { }
             ).getBody();
-            for (Message message : messages) {
-                if (rsl.containsKey(message.getRoomId())) {
-                    rsl.get(message.getRoomId()).addMessage(message);
-                } else {
-                    if (rooms.findById(message.getRoomId()).isPresent()) {
-                        Room room = rooms.findById(message.getRoomId()).get();
-                        room.addMessage(message);
-                        rsl.put(room.getId(), room);
+            if (messages != null) {
+                for (Message message : messages) {
+                    if (rsl.containsKey(message.getRoomId())) {
+                        rsl.get(message.getRoomId()).addMessage(message);
+                    } else {
+                        if (rooms.findById(message.getRoomId()).isPresent()) {
+                            Room room = rooms.findById(message.getRoomId()).get();
+                            room.addMessage(message);
+                            rsl.put(room.getId(), room);
+                        }
                     }
                 }
             }
@@ -71,9 +74,11 @@ public class RoomController {
                     API, HttpMethod.GET, entity, new ParameterizedTypeReference<List<Message>>() {
                     }
             ).getBody();
-            for (Message message : messages) {
-                if (message.getRoomId() == room.get().getId()) {
-                    room.get().addMessage(message);
+            if (messages != null) {
+                for (Message message : messages) {
+                    if (message.getRoomId() == room.get().getId()) {
+                        room.get().addMessage(message);
+                    }
                 }
             }
         }
@@ -94,6 +99,12 @@ public class RoomController {
             rsl = rest.postForObject(API, entity, Message.class);
         }
             return new ResponseEntity<>(rsl, HttpStatus.CREATED);
+    }
+
+    @PatchMapping("/")
+    public ResponseEntity<Room> patch(@RequestBody Room room)
+            throws InvocationTargetException, IllegalAccessException {
+        return new ResponseEntity<>(this.rooms.patch(room), HttpStatus.CREATED);
     }
 
     @PutMapping("/")
