@@ -1,8 +1,8 @@
 package ru.job4j.chat.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.Objects;
 
@@ -11,13 +11,16 @@ import java.util.Objects;
 public class Message {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @NotNull(message = "Id must be non null", groups = {Operation.OnUpdate.class, Operation.OnDelete.class})
     private int id;
+    @NotBlank(message = "Text must be not empty")
     private String text;
     private Date created = new Date(System.currentTimeMillis());
     @Column(name = "room_id")
+    @NotNull(message = "RoomId must be non null")
     private int roomId;
-    @JsonIgnore
     @ManyToOne
+    @NotNull(message = "Author must be non null")
     private Person author;
 
     public Message() {

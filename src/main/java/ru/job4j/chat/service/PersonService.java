@@ -2,9 +2,11 @@ package ru.job4j.chat.service;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import ru.job4j.chat.entity.Person;
 import ru.job4j.chat.repository.PersonRepository;
+import ru.job4j.chat.repository.RoleRepository;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -14,9 +16,11 @@ import java.util.Optional;
 @Service
 public class PersonService {
     private final PersonRepository persons;
+    private final RoleRepository roles;
 
-    public PersonService(PersonRepository persons) {
+    public PersonService(PersonRepository persons, RoleRepository roles) {
         this.persons = persons;
+        this.roles = roles;
     }
 
     public Iterable<Person> findAll() {
@@ -31,7 +35,13 @@ public class PersonService {
         return persons.findByUsername(name);
     }
 
+    @Transactional
     public Person save(Person person) {
+        if (roles.findByRoleName(person.getRole().getRoleName()).isPresent()) {
+            person.setRole(roles.findByRoleName(person.getRole().getRoleName()).get());
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Role is not found");
+        }
         return persons.save(person);
     }
 

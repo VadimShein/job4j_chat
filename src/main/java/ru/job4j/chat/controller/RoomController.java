@@ -5,13 +5,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 import ru.job4j.chat.entity.Message;
+import ru.job4j.chat.entity.Operation;
 import ru.job4j.chat.entity.Room;
 import ru.job4j.chat.service.RoomService;
 
+import javax.validation.Valid;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.HashMap;
@@ -86,7 +89,8 @@ public class RoomController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<Message> create(@RequestBody Message message,
+    @Validated(Operation.OnCreate.class)
+    public ResponseEntity<Message> create(@Valid @RequestBody Message message,
                                           @RequestHeader("Authorization") String token) {
         if (message.getText() == null) {
             throw new NullPointerException("Message text mustn't be empty");
@@ -102,7 +106,7 @@ public class RoomController {
     }
 
     @PatchMapping("/")
-    public ResponseEntity<Room> patch(@RequestBody Room room)
+    public ResponseEntity<Room> patch(@Valid @RequestBody Room room)
             throws InvocationTargetException, IllegalAccessException {
         return new ResponseEntity<>(this.rooms.patch(room), HttpStatus.CREATED);
     }

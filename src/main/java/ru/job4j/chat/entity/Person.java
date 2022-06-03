@@ -1,6 +1,8 @@
 package ru.job4j.chat.entity;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.Objects;
 
 @Entity
@@ -8,10 +10,14 @@ import java.util.Objects;
 public class Person {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @NotNull(message = "Id must be non null", groups = {Operation.OnUpdate.class, Operation.OnDelete.class})
     private int id;
+    @NotBlank(message = "Username must be not empty")
     private String username;
+    @NotBlank(message = "Password must be not empty")
     private String password;
     @ManyToOne
+    @NotBlank(message = "Role must be not empty")
     private Role role;
 
     public Person() {
