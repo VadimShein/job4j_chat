@@ -5,7 +5,7 @@ import ru.job4j.chat.entity.Person;
 
 import java.util.Optional;
 
-public interface PersonRepository extends CrudRepository<Person, Long> {
+public interface UserRepository extends CrudRepository<Person, Long> {
     Optional<Person> findById(int id);
     Optional<Person> findByUsername(String name);
 }

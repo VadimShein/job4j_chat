@@ -17,7 +17,6 @@ public class Person {
     @NotBlank(message = "Password must be not empty")
     private String password;
     @ManyToOne
-    @NotBlank(message = "Role must be not empty")
     private Role role;
 
     public Person() {

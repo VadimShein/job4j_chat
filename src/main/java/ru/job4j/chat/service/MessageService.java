@@ -4,9 +4,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import ru.job4j.chat.entity.Message;
-import ru.job4j.chat.entity.Person;
 import ru.job4j.chat.repository.MessageRepository;
-import ru.job4j.chat.repository.PersonRepository;
+import ru.job4j.chat.repository.UserRepository;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -16,11 +15,11 @@ import java.util.Optional;
 @Service
 public class MessageService {
     private final MessageRepository messages;
-    private final PersonRepository persons;
+    private final UserRepository users;
 
-    public MessageService(MessageRepository messages, PersonRepository persons) {
+    public MessageService(MessageRepository messages, UserRepository users) {
         this.messages = messages;
-        this.persons = persons;
+        this.users = users;
     }
 
     public Iterable<Message> findAll() {
@@ -31,9 +30,13 @@ public class MessageService {
         return messages.findById(id);
     }
 
+    public Iterable<Message> findMessagesByRoomId(int id) {
+        return messages.findMessagesByRoomId(id);
+    }
+
     public Message save(Message message) {
-        if (persons.findById(message.getAuthor().getId()).isPresent()) {
-            message.setAuthor(persons.findById(message.getAuthor().getId()).get());
+        if (users.findById(message.getAuthorId()).isPresent()) {
+            message.setAuthorId(users.findById(message.getAuthorId()).get().getId());
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Author is not found");
         }
@@ -69,7 +72,13 @@ public class MessageService {
         return messages.save(current.get());
     }
 
-    public void delete(Message message) {
-        messages.delete(message);
+    public void delete(int id) {
+        if (messages.findById(id).isPresent()) {
+            Message message = new Message();
+            message.setId(id);
+            messages.delete(message);
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Message id is not found");
+        }
     }
 }

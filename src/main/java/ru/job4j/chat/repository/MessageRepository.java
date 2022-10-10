@@ -7,4 +7,5 @@ import java.util.Optional;
 
 public interface MessageRepository extends CrudRepository<Message, Long> {
     Optional<Message> findById(int id);
+    Iterable<Message> findMessagesByRoomId(int id);
 }

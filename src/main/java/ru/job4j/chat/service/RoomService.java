@@ -24,7 +24,11 @@ public class RoomService {
     }
 
     public Optional<Room> findById(int id) {
-        return rooms.findById(id);
+        if (rooms.findById(id).isPresent()) {
+            return rooms.findById(id);
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Room is not found");
+        }
     }
 
     public Room save(Room room) {
@@ -60,7 +64,14 @@ public class RoomService {
         return rooms.save(current.get());
     }
 
-    public void delete(Room room) {
-        rooms.delete(room);
+    public void delete(int id) {
+        if (rooms.findById(id).isPresent()) {
+            Room room = new Room();
+            room.setId(id);
+            rooms.delete(room);
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Rom id is not found");
+        }
+
     }
 }

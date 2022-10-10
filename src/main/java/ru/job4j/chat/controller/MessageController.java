@@ -3,10 +3,12 @@ package ru.job4j.chat.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import ru.job4j.chat.entity.Message;
 import ru.job4j.chat.entity.Operation;
 import ru.job4j.chat.service.MessageService;
@@ -40,6 +42,13 @@ public class MessageController {
         ).collect(Collectors.toList());
     }
 
+    @GetMapping("/roomId/{id}")
+    public List<Message> findMessagesByRoomId(@PathVariable int id) {
+        return StreamSupport.stream(
+                this.messages.findMessagesByRoomId(id).spliterator(), false
+        ).collect(Collectors.toList());
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Message> findById(@PathVariable int id) {
         var person = this.messages.findById(id);
@@ -51,8 +60,11 @@ public class MessageController {
 
     @PatchMapping("/")
     public ResponseEntity<Message> patch(@Valid @RequestBody Message message) throws InvocationTargetException, IllegalAccessException {
+        if (message.getId() == 0) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Missed param: id");
+        }
         if (message.getText() == null) {
-            throw new NullPointerException("Message text mustn't be empty");
+            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Message text mustn't be empty");
         }
         if (message.getText().contains("rudeWord")) {
             throw new IllegalArgumentException("Message text does not match the rules");
@@ -63,8 +75,11 @@ public class MessageController {
     @PostMapping("/")
     @Validated(Operation.OnCreate.class)
     public ResponseEntity<Message> create(@Valid @RequestBody Message message) {
+        if (message.getId() != 0) {
+            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Message id must be 0");
+        }
         if (message.getText() == null) {
-            throw new NullPointerException("Message text mustn't be empty");
+            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Message text mustn't be empty");
         }
         if (message.getText().contains("rudeWord")) {
             throw new IllegalArgumentException("Message text does not match the rules");
@@ -74,19 +89,25 @@ public class MessageController {
 
     @PutMapping("/")
     public ResponseEntity<Void> update(@Valid @RequestBody Message message) {
+        if (message.getId() == 0) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Missed param: id");
+        }
         if (message.getText() == null) {
-            throw new NullPointerException("Message text mustn't be empty");
+            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Message text mustn't be empty");
         }
         this.messages.save(message);
-        return ResponseEntity.ok().build();
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable int id) {
-        Message message = new Message();
-        message.setId(id);
-        this.messages.delete(message);
-        return ResponseEntity.ok().build();
+        try {
+            messages.delete(id);
+        } catch (EmptyResultDataAccessException e) {
+            e.printStackTrace();
+            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Message with Id: " + id + " not found");
+        }
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @ExceptionHandler(value = {IllegalArgumentException.class})

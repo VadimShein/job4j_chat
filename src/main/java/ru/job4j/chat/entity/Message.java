@@ -19,16 +19,16 @@ public class Message {
     @Column(name = "room_id")
     @NotNull(message = "RoomId must be non null")
     private int roomId;
-    @ManyToOne
-    @NotNull(message = "Author must be non null")
-    private Person author;
+    @Column(name = "author_id")
+    @NotNull(message = "AuthorId must be non null")
+    private int authorId;
 
     public Message() {
     }
 
-    public Message(int id, Person author, String text, int roomId) {
+    public Message(int id, int author, String text, int roomId) {
         this.id = id;
-        this.author = author;
+        this.authorId = author;
         this.text = text;
         this.roomId = roomId;
     }
@@ -65,12 +65,12 @@ public class Message {
         this.roomId = roomId;
     }
 
-    public Person getAuthor() {
-        return author;
+    public int getAuthorId() {
+        return authorId;
     }
 
-    public void setAuthor(Person author) {
-        this.author = author;
+    public void setAuthorId(int authorId) {
+        this.authorId = authorId;
     }
 
     @Override
@@ -97,6 +97,6 @@ public class Message {
                 + ", text='" + text + '\''
                 + ", created=" + created
                 + ", roomId=" + roomId
-                + ", author=" + author + '}';
+                + ", authorId=" + authorId + '}';
     }
 }

@@ -6,7 +6,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import ru.job4j.chat.entity.Person;
-import ru.job4j.chat.repository.PersonRepository;
+import ru.job4j.chat.repository.UserRepository;
 
 import java.util.Optional;
 
@@ -14,9 +14,9 @@ import static java.util.Collections.emptyList;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
-    private final PersonRepository users;
+    private final UserRepository users;
 
-    public UserDetailsServiceImpl(PersonRepository users) {
+    public UserDetailsServiceImpl(UserRepository users) {
         this.users = users;
     }
 
